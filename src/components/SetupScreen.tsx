@@ -116,7 +116,6 @@ COMPLETED_STATUS_NAMES=complete,completed,done`;
             </div>
           </div>
 
-          {/* Setup Guide */}
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-2">
               Where to place your ClickUp Token
@@ -143,7 +142,6 @@ COMPLETED_STATUS_NAMES=complete,completed,done`;
             </div>
           </div>
 
-          {/* Step by step */}
           <div className="border-t border-neutral-100 dark:border-neutral-800 pt-5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-2">
               How to obtain your ClickUp Personal Token
@@ -176,7 +174,6 @@ COMPLETED_STATUS_NAMES=complete,completed,done`;
             </ol>
           </div>
 
-          {/* Retry Action */}
           <div className="pt-2 flex items-center justify-between">
             <a
               href="https://app.clickup.com"

@@ -1,10 +1,10 @@
+// src\components\Sidebar.tsx
 import React from "react";
 import {
   LayoutDashboard,
   Users,
   CheckSquare,
   BarChart3,
-  Settings,
   Moon,
   Sun,
   Menu,
@@ -43,7 +43,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "members", label: "Members", icon: Users },
     { id: "tasks", label: "Monthly Tasks", icon: CheckSquare },
     { id: "reports", label: "Reports", icon: BarChart3 },
-    { id: "settings", label: "Settings", icon: Settings },
   ];
 
   const isConnected = configStatus?.clickupConfigured;
