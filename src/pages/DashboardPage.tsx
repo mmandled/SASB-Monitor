@@ -36,6 +36,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onSelectMember,
   onResetFilters,
 }) => {
+  const activeMembers = (summary?.members || []).filter(
+    (member) => member.assigned > 0,
+  );
+
   return (
     <div className="space-y-6">
       <SummaryCards
@@ -55,7 +59,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
       <FilterBar
         months={summary?.months || []}
-        members={summary?.members || []}
+        members={activeMembers}
         selectedMonth={selectedMonth}
         setSelectedMonth={setSelectedMonth}
         selectedMemberId={selectedMemberId}
@@ -76,7 +80,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       )}
 
       <MemberTable
-        members={summary?.members || []}
+        members={activeMembers}
         onSelectMember={onSelectMember}
         isLoading={isLoading}
       />

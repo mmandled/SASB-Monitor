@@ -145,6 +145,29 @@ export class CacheService {
       const allFetchedTasks: NormalizedTask[] = [];
       const memberMap = new Map<string, NormalizedMember>();
 
+      const teams = await this.client.getTeams();
+      const targetTeam = teams.find(
+        (team) => String(team.id) === String(target.team.id),
+      );
+
+      for (const memberEntry of targetTeam?.members || []) {
+        const member = memberEntry.user;
+
+        const normalizedMember: NormalizedMember = {
+          id: String(member.id),
+          username: member.username || "Unnamed Member",
+          email: member.email,
+          profilePicture: member.profilePicture || null,
+          initials:
+            member.initials ||
+            member.username?.slice(0, 2).toUpperCase() ||
+            "SB",
+          color: member.color,
+        };
+
+        memberMap.set(normalizedMember.id, normalizedMember);
+      }
+
       for (const list of target.lists) {
         console.log(
           `[CacheService] Fetching tasks from list "${list.name}" (ID: ${list.id})...`,

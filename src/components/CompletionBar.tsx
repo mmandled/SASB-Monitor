@@ -1,6 +1,6 @@
 // src\components\CompletionBar.tsx
-import React from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import React from "react";
+import { CheckCircle2 } from "lucide-react";
 
 interface CompletionBarProps {
   totalAssigned: number;
@@ -13,7 +13,7 @@ export const CompletionBar: React.FC<CompletionBarProps> = ({
   totalAssigned,
   totalCompleted,
   overallRate,
-  rateFormatted
+  rateFormatted,
 }) => {
   const isAvailable = totalAssigned > 0;
   const clampedPercentage = Math.min(100, Math.max(0, overallRate));
@@ -31,7 +31,7 @@ export const CompletionBar: React.FC<CompletionBarProps> = ({
           <p className="text-xs text-neutral-500 dark:text-neutral-400">
             {isAvailable
               ? `${totalCompleted.toLocaleString()} of ${totalAssigned.toLocaleString()} total task assignments completed`
-              : 'No tasks currently assigned'}
+              : "No tasks currently assigned"}
           </p>
         </div>
 
@@ -47,12 +47,6 @@ export const CompletionBar: React.FC<CompletionBarProps> = ({
           className="bg-blue-600 dark:bg-blue-500 h-full rounded-full transition-all duration-500 ease-out"
           style={{ width: `${isAvailable ? clampedPercentage : 0}%` }}
         />
-      </div>
-
-      <div className="flex items-center justify-between text-[11px] text-neutral-400 dark:text-neutral-500 mt-2 font-mono">
-        <span>0%</span>
-        <span>50%</span>
-        <span>100%</span>
       </div>
     </div>
   );

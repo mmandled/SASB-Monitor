@@ -22,7 +22,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
       id: 'card-total-members',
       label: 'TOTAL MEMBERS',
       value: totalMembers,
-      sublabel: 'Active assignees',
+      sublabel: 'Active',
       icon: Users,
       iconColor: 'text-blue-700 dark:text-blue-400',
       bgColor: 'bg-blue-50 dark:bg-blue-950/40'
@@ -31,7 +31,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
       id: 'card-assigned-tasks',
       label: 'ASSIGNED TASKS',
       value: totalAssigned,
-      sublabel: 'Total task assignments',
+      sublabel: 'Total task',
       icon: ListTodo,
       iconColor: 'text-cyan-700 dark:text-cyan-400',
       bgColor: 'bg-cyan-50 dark:bg-cyan-950/40'

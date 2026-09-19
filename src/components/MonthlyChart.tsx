@@ -1,3 +1,4 @@
+// src\components\MonthlyChart.tsx
 import React from "react";
 import {
   ResponsiveContainer,
@@ -84,9 +85,6 @@ export const MonthlyChart: React.FC<MonthlyChartProps> = ({
               <div className="flex items-center justify-between mb-2">
                 <span className="font-bold text-xs text-neutral-900 dark:text-neutral-100">
                   {m.month}
-                </span>
-                <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-100/60 dark:bg-blue-950 px-1.5 py-0.5 rounded-md">
-                  {m.completionRateFormatted}
                 </span>
               </div>
 
