@@ -1,19 +1,11 @@
 // src\pages\ReportsPage.tsx
 import React, { useState } from "react";
-import {
-  Download,
-  BarChart3,
-  FileSpreadsheet,
-  CheckCircle2,
-  Clock,
-} from "lucide-react";
+import { ExternalLink, FileSpreadsheet } from "lucide-react";
 import type {
   MonthStats,
   MemberStats,
   NormalizedTask,
 } from "../types/index.js";
-import { exportToCSV } from "../lib/utils.js";
-
 interface ReportsPageProps {
   monthlyStats: MonthStats[];
   members: MemberStats[];
@@ -36,38 +28,12 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
           (m) => m.month.toLowerCase() === selectedMonth.toLowerCase(),
         );
 
-  const handleExportMembers = () => {
-    const data = members.map((m) => ({
-      "Member ID": m.memberId,
-      "Member Name": m.memberName,
-      Email: m.email || "",
-      "Total Assigned": m.assigned,
-      "Completed Tasks": m.completed,
-      "Active Tasks": m.active,
-      "Completion Rate": m.completionRateFormatted,
-    }));
-    exportToCSV(
-      `SAS_Bulletin_Members_${new Date().toISOString().slice(0, 10)}`,
-      data,
-    );
-  };
+  const googleSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL;
 
-  const handleExportTasks = () => {
-    const data = tasks.map((t) => ({
-      "Task ID": t.id,
-      "Task Name": t.name,
-      "Month / List": t.listName || t.month,
-      Status: t.status,
-      "Is Completed": t.isCompleted ? "Yes" : "No",
-      Assignees: t.assignees.map((a) => a.username).join("; "),
-      "Due Date": t.dueDate || "",
-      Priority: t.priority || "",
-      "ClickUp URL": t.url,
-    }));
-    exportToCSV(
-      `SAS_Bulletin_Tasks_${new Date().toISOString().slice(0, 10)}`,
-      data,
-    );
+  const handleOpenGoogleSheet = () => {
+    if (!googleSheetsUrl) return;
+
+    window.open(googleSheetsUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -81,24 +47,13 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
 
         <div className="flex items-center gap-2">
           <button
-            onClick={handleExportMembers}
-            disabled={members.length === 0}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-700/60 shadow-xs transition-colors"
+            onClick={handleOpenGoogleSheet}
+            disabled={!googleSheetsUrl}
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white dark:bg-blue-600 dark:hover:bg-blue-700 shadow-xs transition-colors"
           >
-            <FileSpreadsheet
-              size={14}
-              className="text-blue-600 dark:text-blue-400"
-            />
-            <span>Export Members (CSV)</span>
-          </button>
-
-          <button
-            onClick={handleExportTasks}
-            disabled={tasks.length === 0}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-700 shadow-xs transition-colors"
-          >
-            <Download size={14} />
-            <span>Export Tasks (CSV)</span>
+            <FileSpreadsheet size={14} />
+            <span>Open Google Sheet</span>
+            <ExternalLink size={12} />
           </button>
         </div>
       </div>

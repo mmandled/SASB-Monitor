@@ -11,6 +11,7 @@ import type {
   DashboardSummary,
   ClickUpConfigStatus,
 } from "../types/analytics.js";
+import { googleSheetsService } from "./googleSheetsService.js";
 
 export class CacheService {
   private client: ClickUpClient;
@@ -212,6 +213,36 @@ export class CacheService {
       console.log(
         `[CacheService] Sync complete. Processed ${deduplicated.length} unique tasks and ${this.knownMembers.length} members.`,
       );
+
+      if (googleSheetsService.isConfigured()) {
+        try {
+          const summary = this.analytics.generateDashboardSummary(
+            this.rawTasks,
+            {
+              lastSynced: this.lastSynced,
+              isSyncing: false,
+              allKnownMembers: this.knownMembers,
+            },
+          );
+
+          const members = this.analytics.calculateMemberStats(
+            this.rawTasks,
+            this.knownMembers,
+          );
+
+          await googleSheetsService.syncReport({
+            summary,
+            members,
+            tasks: this.rawTasks,
+            lastSynced: this.lastSynced,
+          });
+        } catch (sheetError: any) {
+          console.error(
+            "[CacheService] Google Sheets sync failed:",
+            sheetError.message,
+          );
+        }
+      }
 
       return {
         success: true,
