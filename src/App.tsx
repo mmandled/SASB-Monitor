@@ -18,7 +18,7 @@ import {
   fetchMonths,
   fetchConfigStatus,
   triggerSync,
-  fetchDepartments
+  fetchDepartments,
 } from "./lib/api.js";
 import type {
   DashboardSummary,
@@ -144,13 +144,13 @@ export function App() {
   }, []);
 
   const loadDepartments = useCallback(async () => {
-  try {
-    const data = await fetchDepartments();
-    setDepartments(data);
-  } catch (err: any) {
-    console.error("[App] Failed loading department analytics:", err.message);
-  }
-}, []);
+    try {
+      const data = await fetchDepartments();
+      setDepartments(data);
+    } catch (err: any) {
+      console.error("[App] Failed loading department analytics:", err.message);
+    }
+  }, []);
 
   // Initial load
   useEffect(() => {
@@ -162,8 +162,36 @@ export function App() {
   }, [loadReportData]);
 
   useEffect(() => {
-  loadDepartments();
-}, [loadDepartments]);
+    loadDepartments();
+  }, [loadDepartments]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
+
+      void Promise.all([loadData(true), loadReportData(), loadDepartments()]);
+    }, 10_000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [loadData, loadReportData, loadDepartments]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void Promise.all([loadData(true), loadReportData(), loadDepartments()]);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [loadData, loadReportData, loadDepartments]);
 
   const handleRefresh = async () => {
     if (isSyncing) return;
