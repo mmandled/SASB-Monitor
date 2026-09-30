@@ -123,6 +123,90 @@ apiRouter.get("/members", async (req: Request, res: Response) => {
   }
 });
 
+apiRouter.get("/departments", async (_req: Request, res: Response) => {
+  try {
+    const members = cacheService.getMembers();
+    const savedPositions = await getMemberPositions();
+
+    const positionMap = new Map(
+      savedPositions.map((item) => [
+        String(item.clickupUserId),
+        item.position,
+      ]),
+    );
+
+    const departmentMap = new Map<
+      string,
+      {
+        department: string;
+        memberCount: number;
+        assigned: number;
+        completed: number;
+        active: number;
+      }
+    >();
+
+    for (const member of members) {
+      const position =
+        positionMap.get(String(member.memberId)) ?? null;
+
+      const department = getPositionGroupLabel(position);
+
+      // Members without a position are not part of
+      // department analytics yet.
+      if (!department) continue;
+
+      const existing = departmentMap.get(department) ?? {
+        department,
+        memberCount: 0,
+        assigned: 0,
+        completed: 0,
+        active: 0,
+      };
+
+      existing.memberCount += 1;
+      existing.assigned += member.assigned;
+      existing.completed += member.completed;
+      existing.active += member.active;
+
+      departmentMap.set(department, existing);
+    }
+
+    const departments = Array.from(departmentMap.values())
+      .map((department) => {
+        const completionRate =
+          department.assigned > 0
+            ? Math.round(
+                (department.completed / department.assigned) * 1000,
+              ) / 10
+            : 0;
+
+        return {
+          ...department,
+          completionRate,
+          completionRateFormatted:
+            department.assigned > 0
+              ? `${completionRate}%`
+              : "N/A",
+        };
+      })
+      .sort((a, b) =>
+        a.department.localeCompare(b.department),
+      );
+
+    res.json({
+      departments,
+      count: departments.length,
+    });
+  } catch (err: any) {
+    console.error("[API /departments Error]:", err.message);
+
+    res.status(500).json({
+      error: "Failed to retrieve department analytics",
+    });
+  }
+});
+
 apiRouter.get("/members/:memberId", (req: Request, res: Response) => {
   try {
     const { memberId } = req.params;

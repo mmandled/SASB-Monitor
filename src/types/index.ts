@@ -90,3 +90,12 @@ export interface ClickUpConfigStatus {
   lastSyncedAt?: string | null;
   error?: string | null;
 }
+export interface DepartmentStats {
+  department: string;
+  memberCount: number;
+  assigned: number;
+  completed: number;
+  active: number;
+  completionRate: number;
+  completionRateFormatted: string;
+}

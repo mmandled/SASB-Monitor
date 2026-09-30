@@ -4,6 +4,7 @@ import type {
   MemberStats,
   NormalizedTask,
   ClickUpConfigStatus,
+  DepartmentStats,
 } from "../types/index.js";
 
 export async function fetchDashboard(
@@ -208,4 +209,16 @@ export async function saveMemberPosition(
   }
 
   return data.member;
+}
+
+export async function fetchDepartments(): Promise<DepartmentStats[]> {
+  const response = await fetch("/api/departments");
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch department analytics");
+  }
+
+  const data = await response.json();
+
+  return data.departments;
 }

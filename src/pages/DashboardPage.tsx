@@ -5,7 +5,8 @@ import { CompletionBar } from "../components/CompletionBar.js";
 import { FilterBar } from "../components/FilterBar.js";
 import { MemberTable } from "../components/MemberTable.js";
 import { MonthlyChart } from "../components/MonthlyChart.js";
-import type { DashboardSummary, MemberStats } from "../types/index.js";
+import type { DashboardSummary, MemberStats, DepartmentStats } from "../types/index.js";
+import { DepartmentOverview } from "../components/DepartmentOverview.js";
 
 interface DashboardPageProps {
   summary: DashboardSummary | null;
@@ -20,10 +21,12 @@ interface DashboardPageProps {
   setSearchQuery: (q: string) => void;
   onSelectMember: (member: MemberStats) => void;
   onResetFilters: () => void;
+  departments: DepartmentStats[];
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
   summary,
+  departments,
   isLoading,
   selectedMonth,
   setSelectedMonth,
@@ -57,6 +60,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         rateFormatted={summary?.overallCompletionFormatted || "N/A"}
       />
 
+      <DepartmentOverview departments={departments} isLoading={isLoading} />
+
       <FilterBar
         months={summary?.months || []}
         members={activeMembers}
@@ -87,3 +92,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     </div>
   );
 };
+
+interface DashboardPageProps {
+  summary: DashboardSummary | null;
+  isLoading: boolean;
+  selectedMonth: string;
+  setSelectedMonth: (m: string) => void;
+  selectedMemberId: string;
+  setSelectedMemberId: (m: string) => void;
+  selectedStatus: "all" | "completed" | "active";
+  setSelectedStatus: (s: "all" | "completed" | "active") => void;
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
+  onSelectMember: (member: MemberStats) => void;
+  onResetFilters: () => void;
+  departments: DepartmentStats[];
+}

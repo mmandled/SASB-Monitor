@@ -9,6 +9,7 @@ import { DashboardPage } from "./pages/DashboardPage.js";
 import { MembersPage } from "./pages/MembersPage.js";
 import { TasksPage } from "./pages/TasksPage.js";
 import { ReportsPage } from "./pages/ReportsPage.js";
+import type { DepartmentStats } from "./types/index.js";
 import { SasbRolePage } from "./pages/SasbRolePage.js";
 import {
   fetchDashboard,
@@ -17,6 +18,7 @@ import {
   fetchMonths,
   fetchConfigStatus,
   triggerSync,
+  fetchDepartments
 } from "./lib/api.js";
 import type {
   DashboardSummary,
@@ -27,6 +29,7 @@ import type {
 
 export function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [departments, setDepartments] = useState<DepartmentStats[]>([]);
   const [configStatus, setConfigStatus] = useState<ClickUpConfigStatus | null>(
     null,
   );
@@ -140,14 +143,27 @@ export function App() {
     }
   }, []);
 
+  const loadDepartments = useCallback(async () => {
+  try {
+    const data = await fetchDepartments();
+    setDepartments(data);
+  } catch (err: any) {
+    console.error("[App] Failed loading department analytics:", err.message);
+  }
+}, []);
+
   // Initial load
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   useEffect(() => {
-  loadReportData();
-}, [loadReportData]);
+    loadReportData();
+  }, [loadReportData]);
+
+  useEffect(() => {
+  loadDepartments();
+}, [loadDepartments]);
 
   const handleRefresh = async () => {
     if (isSyncing) return;
@@ -158,7 +174,7 @@ export function App() {
         "success",
         result.message || "Data synced successfully with ClickUp.",
       );
-      await Promise.all([loadData(), loadReportData()]);
+      await Promise.all([loadData(), loadReportData(), loadDepartments()]);
     } catch (err: any) {
       showToast("error", err.message || "Failed to sync with ClickUp.");
     } finally {
@@ -219,6 +235,7 @@ export function App() {
               {activeTab === "dashboard" && (
                 <DashboardPage
                   summary={summary}
+                  departments={departments}
                   isLoading={isLoading}
                   selectedMonth={selectedMonth}
                   setSelectedMonth={setSelectedMonth}
