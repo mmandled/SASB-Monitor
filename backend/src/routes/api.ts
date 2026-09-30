@@ -20,8 +20,58 @@ import {
 } from "../services/roleAuthService.js";
 
 import { requireRoleAuth } from "../middleware/requireRoleAuth.js";
+import { verifyClickUpWebhookSignature } from "../services/clickupWebhookService.js";
 
 export const apiRouter = Router();
+
+apiRouter.post("/webhooks/clickup", (req: Request, res: Response) => {
+  const signature = req.header("X-Signature") || undefined;
+  const rawBody = (req as any).rawBody as Buffer | undefined;
+
+  if (!verifyClickUpWebhookSignature(rawBody, signature)) {
+    console.warn("[ClickUp Webhook] Invalid signature");
+
+    res.status(401).json({
+      success: false,
+      error: "Invalid webhook signature",
+    });
+
+    return;
+  }
+
+  const event =
+    typeof req.body?.event === "string"
+      ? req.body.event
+      : "unknown";
+
+  const taskId =
+    typeof req.body?.task_id === "string"
+      ? req.body.task_id
+      : null;
+
+  console.log(
+    `[ClickUp Webhook] Received ${event}${taskId ? ` for task ${taskId}` : ""}`,
+  );
+
+  res.status(200).json({
+    success: true,
+    received: true,
+  });
+
+  void cacheService
+    .sync()
+    .then((result) => {
+      console.log(
+        `[ClickUp Webhook] Sync completed after ${event}: ${result.message}`,
+      );
+    })
+    .catch((err) => {
+      console.error(
+        `[ClickUp Webhook] Sync failed after ${event}:`,
+        err.message,
+      );
+    });
+});
 
 apiRouter.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });

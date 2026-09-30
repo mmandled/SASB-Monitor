@@ -1,17 +1,31 @@
 import "dotenv/config";
 
 import express from "express";
+import type { Request } from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { apiRouter } from "./backend/src/routes/api.js";
 import { cacheService } from "./backend/src/services/cacheService.js";
-import cookieParser from 'cookie-parser';
+import cookieParser from "cookie-parser";
 
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
-  app.use(express.json());
+  app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      const request = req as Request & {
+        rawBody?: Buffer;
+      };
+
+      if (request.originalUrl === "/api/webhooks/clickup") {
+        request.rawBody = Buffer.from(buf);
+      }
+    },
+  }),
+);
+
   app.use(cookieParser());
 
   app.use("/api", apiRouter);
