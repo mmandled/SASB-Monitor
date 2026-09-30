@@ -206,7 +206,7 @@ export class TaskAnalytics {
       if (task.isCompleted) {
         m.completed += assigneeCount;
       } else {
-        m.active += assigneeCount;
+        m.active += 1;
       }
     }
 
@@ -291,13 +291,13 @@ export class TaskAnalytics {
 
     let totalAssigned = 0;
     let totalCompleted = 0;
-    let totalActive = 0;
 
     for (const m of members) {
       totalAssigned += m.assigned;
       totalCompleted += m.completed;
-      totalActive += m.active;
+
     }
+    const totalActive = filtered.filter((task) => !task.isCompleted).length;
 
     let overallCompletionRate = 0;
     let overallCompletionFormatted = 'N/A';
@@ -305,7 +305,6 @@ export class TaskAnalytics {
       overallCompletionRate = Math.round((totalCompleted / totalAssigned) * 1000) / 10;
       overallCompletionFormatted = `${overallCompletionRate.toFixed(overallCompletionRate % 1 === 0 ? 0 : 1)}%`;
     }
-
     const statusCountMap = new Map<string, { count: number; isCompleted: boolean }>();
     for (const t of filtered) {
       const s = t.status;

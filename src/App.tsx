@@ -9,6 +9,7 @@ import { DashboardPage } from "./pages/DashboardPage.js";
 import { MembersPage } from "./pages/MembersPage.js";
 import { TasksPage } from "./pages/TasksPage.js";
 import { ReportsPage } from "./pages/ReportsPage.js";
+import { SasbRolePage } from "./pages/SasbRolePage.js";
 import {
   fetchDashboard,
   fetchMembers,
@@ -30,6 +31,9 @@ export function App() {
     null,
   );
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [reportSummary, setReportSummary] = useState<DashboardSummary | null>(
+    null,
+  );
   const [tasks, setTasks] = useState<NormalizedTask[]>([]);
   const [members, setMembers] = useState<MemberStats[]>([]);
   const [months, setMonths] = useState<string[]>([]);
@@ -84,6 +88,7 @@ export function App() {
   const loadData = useCallback(
     async (filtersChanged = false) => {
       if (!filtersChanged) setIsLoading(true);
+
       try {
         const config = await fetchConfigStatus();
         setConfigStatus(config);
@@ -108,6 +113,7 @@ export function App() {
           fetchMembers(),
           fetchMonths(),
         ]);
+
         setMembers(memberList);
         setMonths(monthList);
       } catch (err: any) {
@@ -119,10 +125,29 @@ export function App() {
     [selectedMonth, selectedMemberId, selectedStatus, searchQuery],
   );
 
+  const loadReportData = useCallback(async () => {
+    try {
+      const reportData = await fetchDashboard({
+        month: "all",
+        memberId: "all",
+        status: "all",
+        search: "",
+      });
+
+      setReportSummary(reportData);
+    } catch (err: any) {
+      console.error("[App] Failed loading report data:", err.message);
+    }
+  }, []);
+
   // Initial load
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+  loadReportData();
+}, [loadReportData]);
 
   const handleRefresh = async () => {
     if (isSyncing) return;
@@ -133,7 +158,7 @@ export function App() {
         "success",
         result.message || "Data synced successfully with ClickUp.",
       );
-      await loadData();
+      await Promise.all([loadData(), loadReportData()]);
     } catch (err: any) {
       showToast("error", err.message || "Failed to sync with ClickUp.");
     } finally {
@@ -149,6 +174,13 @@ export function App() {
   };
 
   const isClickUpConfigured = configStatus?.clickupConfigured;
+
+  const isSasbRolePage =
+    window.location.pathname.replace(/\/+$/, "") === "/sasbrole";
+
+  if (isSasbRolePage) {
+    return <SasbRolePage />;
+  }
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex transition-colors duration-200">
@@ -220,7 +252,7 @@ export function App() {
 
               {activeTab === "reports" && (
                 <ReportsPage
-                  monthlyStats={summary?.monthlyStats || []}
+                  monthlyStats={reportSummary?.monthlyStats || []}
                   members={members}
                   tasks={tasks}
                   isLoading={isLoading}
