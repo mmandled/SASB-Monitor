@@ -12,6 +12,19 @@ export const DepartmentOverview: React.FC<DepartmentOverviewProps> = ({
   departments,
   isLoading,
 }) => {
+    const PRODUCTION_DEPARTMENTS = [
+  "Illustration",
+  "Graphics",
+  "Photo",
+  "Video",
+  "Content",
+  "Writer",
+  "Online Manager",
+];
+
+const productionDepartments = departments.filter((department) =>
+  PRODUCTION_DEPARTMENTS.includes(department.department),
+);
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -29,7 +42,7 @@ export const DepartmentOverview: React.FC<DepartmentOverviewProps> = ({
     );
   }
 
-  if (departments.length === 0) {
+  if (productionDepartments.length === 0) {
     return null;
   }
 
@@ -42,7 +55,7 @@ export const DepartmentOverview: React.FC<DepartmentOverviewProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {departments.map((department) => (
+        {productionDepartments.map((department) => (
           <div
             key={department.department}
             className="p-5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 shadow-xs"
