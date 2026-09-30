@@ -4,6 +4,7 @@ import type {
   MemberStats,
   NormalizedTask,
 } from "../types/analytics.js";
+import { getMemberPositions } from "./positionService.js";
 
 const DASHBOARD_SHEET = "Dashboard";
 const MEMBERS_SHEET = "Members";
@@ -58,8 +59,14 @@ export class GoogleSheetsService {
 
     await this.ensureSheets(sheets);
 
+    const savedPositions = await getMemberPositions();
+
+    const positionMap = new Map(
+      savedPositions.map((item) => [String(item.clickupUserId), item.position]),
+    );
+
     const dashboardRows = this.buildDashboardRows(data.summary);
-    const memberRows = this.buildMemberRows(data.members);
+    const memberRows = this.buildMemberRows(data.members, positionMap);
     const taskRows = this.buildTaskRows(data.tasks);
 
     await sheets.spreadsheets.values.batchClear({
@@ -150,11 +157,15 @@ export class GoogleSheetsService {
     ];
   }
 
-  private buildMemberRows(members: MemberStats[]): (string | number)[][] {
+  private buildMemberRows(
+    members: MemberStats[],
+    positionMap: Map<string, string>,
+  ): (string | number)[][] {
     return [
       [
         "Member",
         "Email",
+        "Position",
         "Assigned",
         "Completed",
         "Remaining",
@@ -163,6 +174,7 @@ export class GoogleSheetsService {
       ...members.map((member) => [
         member.memberName,
         member.email || "",
+        positionMap.get(String(member.memberId)) || "",
         member.assigned,
         member.completed,
         member.active,
@@ -258,7 +270,7 @@ export class GoogleSheetsService {
                 backgroundColor: {
                   red: 0.12,
                   green: 0.35,
-                  blue: 0.70,
+                  blue: 0.7,
                 },
                 textFormat: {
                   bold: true,
@@ -311,7 +323,7 @@ export class GoogleSheetsService {
                 backgroundColor: {
                   red: 0.12,
                   green: 0.35,
-                  blue: 0.70,
+                  blue: 0.7,
                 },
                 textFormat: {
                   bold: true,
@@ -423,14 +435,14 @@ export class GoogleSheetsService {
               startRowIndex: 0,
               endRowIndex: 1,
               startColumnIndex: 0,
-              endColumnIndex: 6,
+              endColumnIndex: 7,
             },
             cell: {
               userEnteredFormat: {
                 backgroundColor: {
                   red: 0.12,
                   green: 0.35,
-                  blue: 0.70,
+                  blue: 0.7,
                 },
                 textFormat: {
                   bold: true,
@@ -452,11 +464,11 @@ export class GoogleSheetsService {
             range: {
               sheetId: membersId,
               dimension: "COLUMNS",
-              startIndex: 0,
-              endIndex: 1,
+              startIndex: 2,
+              endIndex: 3,
             },
             properties: {
-              pixelSize: 190,
+              pixelSize: 210,
             },
             fields: "pixelSize",
           },
@@ -493,12 +505,27 @@ export class GoogleSheetsService {
         },
 
         {
+          updateDimensionProperties: {
+            range: {
+              sheetId: membersId,
+              dimension: "COLUMNS",
+              startIndex: 3,
+              endIndex: 7,
+            },
+            properties: {
+              pixelSize: 125,
+            },
+            fields: "pixelSize",
+          },
+        },
+
+        {
           repeatCell: {
             range: {
               sheetId: membersId,
               startRowIndex: 1,
               startColumnIndex: 0,
-              endColumnIndex: 6,
+              endColumnIndex: 7,
             },
             cell: {
               userEnteredFormat: {
@@ -542,7 +569,7 @@ export class GoogleSheetsService {
                 backgroundColor: {
                   red: 0.12,
                   green: 0.35,
-                  blue: 0.70,
+                  blue: 0.7,
                 },
                 textFormat: {
                   bold: true,
