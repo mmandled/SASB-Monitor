@@ -32,6 +32,8 @@ export interface MemberStats {
   profilePicture?: string | null;
   initials?: string;
   color?: string;
+  position: string | null;
+  department: string | null;
   assigned: number;
   completed: number;
   active: number;

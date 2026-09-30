@@ -3,6 +3,7 @@ import { cacheService } from "../services/cacheService.js";
 import {
   SASB_POSITION_GROUPS,
   SASB_POSITIONS,
+  getPositionGroupLabel,
 } from "../config/sasbPositions.js";
 
 import {
@@ -81,15 +82,44 @@ apiRouter.get("/dashboard", (req: Request, res: Response) => {
   }
 });
 
-apiRouter.get("/members", (req: Request, res: Response) => {
+apiRouter.get("/members", async (req: Request, res: Response) => {
   try {
     const search =
-      typeof req.query.search === "string" ? req.query.search : undefined;
+      typeof req.query.search === "string"
+        ? req.query.search
+        : undefined;
+
     const members = cacheService.getMembers(search);
-    res.json({ members, count: members.length });
+    const savedPositions = await getMemberPositions();
+
+    const positionMap = new Map(
+      savedPositions.map((item) => [
+        String(item.clickupUserId),
+        item.position,
+      ]),
+    );
+
+    const membersWithPositions = members.map((member) => {
+      const position =
+        positionMap.get(String(member.memberId)) ?? null;
+
+      return {
+        ...member,
+        position,
+        department: getPositionGroupLabel(position),
+      };
+    });
+
+    res.json({
+      members: membersWithPositions,
+      count: membersWithPositions.length,
+    });
   } catch (err: any) {
     console.error("[API /members Error]:", err.message);
-    res.status(500).json({ error: "Failed to retrieve members" });
+
+    res.status(500).json({
+      error: "Failed to retrieve members",
+    });
   }
 });
 
